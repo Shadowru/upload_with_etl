@@ -1,0 +1,27 @@
+{
+  "name": "upload_with_etl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel pages/index.html",
+    "build": "babel  --watch src -d dist --source-maps",
+    "build2": "parcel build --experimental-scope-hoisting --public-url . pages/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
+    "parcel": "^1.11.0"
+  },
+  "dependencies": {
+    "@turf/turf": "^5.1.6",
+    "fs-extra": "^9.0.1",
+    "geojson-vt": "^3.2.1",
+    "mongodb": "^3.6.1",
+    "ol": "^6.4.3"
+  }
+}
