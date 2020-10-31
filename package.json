@@ -19,9 +19,20 @@
   },
   "dependencies": {
     "@turf/turf": "^5.1.6",
+    "core-js": "^2.6.11",
+    "filterxml": "^1.1.4",
     "fs-extra": "^9.0.1",
     "geojson-vt": "^3.2.1",
     "mongodb": "^3.6.1",
-    "ol": "^6.4.3"
+    "ol": "^6.4.3",
+    "osmtogeojson": "^3.0.0-beta.4",
+    "overpass-frontend": "^2.4.11",
+    "pg": "^8.3.3",
+    "proj4": "^2.6.2",
+    "proj4js": "^10.0.0",
+    "uuid": "^8.3.0",
+    "xlsx": "^0.16.8",
+    "xmldom": "^0.3.0",
+    "xpath": "0.0.29"
   }
 }

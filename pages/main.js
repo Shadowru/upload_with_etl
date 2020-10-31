@@ -37,7 +37,7 @@ var vectorLayer = new VectorLayer({
     style: function (feature) {
         style.getText().setText(feature.get('name'));
         return style;
-    },
+    }
 });
 
 const coords = fromLonLat([37.618423, 55.751244])

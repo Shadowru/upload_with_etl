@@ -12,12 +12,19 @@
     Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMDM4YWRiNS02NTEwLTQ3M2UtYjhjMi0yYzEwMGQwYmJiZGEiLCJpZCI6MTkxNTUsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NzUwMjk1NDZ9.q_0fL7JP-pUEKrAxZL_eOlvtqmE9iJAGu7Orz9QwxGc';
 
     //var viewer = new Cesium.Viewer('cesiumContainer');
-    var viewer = new Cesium.Viewer('cesiumContainer');
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+        //Start in Columbus Viewer
+        sceneMode: Cesium.SceneMode.SCENE2D,
+        imageryProvider : new Cesium.OpenStreetMapImageryProvider({
+            url : 'https://a.tile.openstreetmap.org/'
+        }),
+        mapProjection : new Cesium.WebMercatorProjection(),
+    });
 
     const geoJSONDataSource = Cesium.GeoJsonDataSource.load('../data/convert.json',
         {
-            stroke: Cesium.Color.GREEN,
-            fill: Cesium.Color.CHARTREUSE,
+            stroke: Cesium.Color.FUCHSIA,
+            fill: Cesium.Color.ORANGERED,
             strokeWidth: 1,
             markerSymbol: '?'
         }

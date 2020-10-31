@@ -3,6 +3,7 @@ import * as turf from '@turf/turf'
 
 
 const geoJSON = fs_extra.readJsonSync('./data/1.json');
+//const geoJSON = fs_extra.readJsonSync('./data/odh20200928');
 
 const exportFeatures = [];
 
@@ -13,12 +14,19 @@ function getStartEndPoint(feature) {
     //TODO: Check type and many multilines
 
     const startPoint = coordinates[0];
-    const endPoint = coordinates[coordinates.length - 1];
+
+    const coordinates_end = feature.geometry.coordinates[feature.geometry.coordinates.length - 1];
+
+    const endPoint = coordinates_end[coordinates_end.length - 1];
 
     return {
         startPoint: startPoint,
         endPoint: endPoint
     };
+}
+
+function convertLineToPolygonBuffer(feature, roadWidth) {
+    return turf.buffer(feature, roadWidth, {units: 'meters'});
 }
 
 function convertLineToPolygon(feature, roadWidth) {
@@ -97,10 +105,15 @@ function calcSelfIntersect(feature) {
 
 function convertLine(feature, intersectPoint) {
 
-    const coords = intersectPoint.geometry.coordinates;
+    const intersect_coords = intersectPoint.geometry.coordinates;
+    const coords = turf.getCoords(feature)[0];
 
+    coords[0] = intersect_coords;
+    coords[coords.length - 1] = intersect_coords;
 
-    console.log('1');
+    return turf.lineToPolygon(feature);
+
+    //console.log('1');
 
 }
 
@@ -110,6 +123,8 @@ statisticMap.set(0, 0);
 statisticMap.set(1, 0);
 statisticMap.set(2, 0);
 statisticMap.set(3, 0);
+statisticMap.set(4, 0);
+statisticMap.set(5, 0);
 
 for (const feature of geoJSON.features) {
 
@@ -125,36 +140,47 @@ for (const feature of geoJSON.features) {
 
     feature.properties.global_id = global_id;
 
-    if (global_id === 1031181321) {
+    if (global_id === 1032995558) {
         console.log('Test ID : ' + global_id);
     }
 
     const {startPoint, endPoint} = getStartEndPoint(feature);
 
-    const distance = turf.distance(
+    const raw_distance = turf.distance(
         startPoint,
         endPoint,
         {units: 'meters'}
     );
 
-    const expectedEpsilon = calcEpsilon(feature);
+    //const expectedEpsilon = calcEpsilon(feature);
+    const featureLength = turf.length(feature, {units: "meters"});
+
+    const epsilon = Math.max(5, featureLength / 20);
+
 
     //distance < expectedEpsilon
-    let convert_type = 1;
+    let convert_type = 5;
 
     const intersects_kinks = calcSelfIntersect(feature);
 
     const intersects = intersects_kinks !== undefined ? intersects_kinks.features.length : 0
 
-    if (intersects === 1) {
-        convert_type = 3;
-    }
-
-    if (convert_type === 1) {
-        if (distance < 5) {
-            convert_type = 3;
+    if (raw_distance < epsilon) {
+        if (intersects === 1) {
+            convert_type = 0;
+        } else {
+            convert_type = 1;
         }
     }
+
+
+    /*
+    if (convert_type === 1) {
+        if (distance < 5) {
+            convert_type = 1;
+        }
+    }
+     */
 
     statisticMap.set(
         convert_type,
@@ -167,8 +193,8 @@ for (const feature of geoJSON.features) {
 
             try {
                 exportFeatures.push(
-                    //convertLine(feature, intersects_kinks.features[0])
-                    turf.lineToPolygon(feature)
+                    convertLine(feature, intersects_kinks.features[0])
+                    //turf.lineToPolygon(feature)
                 )
             } catch (e) {
                 console.log(
@@ -178,12 +204,25 @@ for (const feature of geoJSON.features) {
             }
             break;
         case 1:
+            try {
+                turf.featureEach(turf.polygonize(feature), currentFeature => {
+                    exportFeatures.push(
+                        currentFeature
+                    )
+                })
+
+            } catch (e) {
+                console.log(
+                    'Ex : ' + e,
+                    JSON.stringify(feature, null, 4)
+                )
+            }
             break;
         case 2:
             feature.properties.converter = 'Road convert';
             try {
                 exportFeatures.push(
-                    convertLineToPolygon(feature, 4)
+                    convertLineToPolygonBuffer(feature, 5)
                 )
             } catch (ex) {
                 console.log(
@@ -211,11 +250,16 @@ for (const feature of geoJSON.features) {
                 )
             }
             break;
+        case 5:
+            exportFeatures.push(
+                feature
+            )
+            break;
     }
 }
 
 const polygonJSON = turf.featureCollection(exportFeatures);
 
-fs_extra.writeJsonSync('./dist/convert.json', polygonJSON, {spaces: 4});
+fs_extra.writeJsonSync('./data/convert.json', polygonJSON, {spaces: 4});
 
 console.log(statisticMap);
